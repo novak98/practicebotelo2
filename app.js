@@ -14,11 +14,13 @@ const deleteItem = (id) => {
     }
   })
   } 
-  const updateValue = (e) => {
-    if(data[0].isEnabled){
-      data[0][e.target.id] = e.target.value;
-      console.log(e.target.id, data[0][e.target.id])
-    
+  const updateValue = (e,item,index) => {
+    if(data[index].isEnabled){
+      if(Object.keys(item.address).includes(e.target.id)) 
+data[index]['address'][e.target.id]= e.target.value
+else if (['bs'].includes(e.target.id))
+data[index]['company'][e.target.id]= e.target.value
+else data[index][e.target.id]=e.target.value
     }
   }
 
@@ -56,7 +58,7 @@ request.onload = function () {
     data.forEach((item,index) => {
       const row = document.createElement('div')
      row.setAttribute('class', 'row mainrow')
-      row.onclick = () => renderSideBar(item)
+      row.onclick = () => renderSideBar(item,index)
 
      const items = [
        {
@@ -122,50 +124,32 @@ request.onload = function () {
 request.send()
 
 
-const renderSideBar = (item) => {
+const renderSideBar = (item,index) => {
   const sideBar = document.getElementsByClassName("rightsection")[0];
 
-//  const keys = Object.keys(item)
+  let copy = JSON.parse(JSON.stringify(item))
+  copy = {...copy,...item.address, bs:''}
+  delete copy.city
+  delete copy.geo
+  delete copy.id
+  delete copy.isEnabled
+  delete copy.company
+  delete copy.address
+  const keys = Object.keys(copy)
+  const adresses = ['street','zipcode','suite'];
+  const company = 'bs';
+  
+
+keys.forEach((key) => {
+  
+  const input = document.querySelector(`#${key}`)
  
-// keys.forEach((key) => {
-//   const input = document.querySelector(`#${key}`)
-//   console.log(input)
-//   input.value=item[key]
-//   input.disabled = !item.isEnabled
-//   input.addEventListener('submit',updateValue)
+ 
+  if(adresses.includes(key)) input.value = item['address'][key];
+   else if (key === company) input.value = item['company'][key]
+    else  input.value = item[key]
+  input.disabled = !item.isEnabled
+  input.addEventListener('input',(e) => updateValue(e,item,index))
     
-// })
-       
-  const name = document.querySelector("#name")
-  name.value=item.name
-  name.disabled = !item.isEnabled
-  name.addEventListener('submit',updateValue)
-  const username = document.querySelector("#username")
-  username.value=item.username
-  username.disabled = !item.isEnabled
-  username.addEventListener('submit',updateValue)
-  const email = document.querySelector("#email")
-  email.value=item.email
-  email.disabled = !item.isEnabled
-  email.addEventListener('submit',updateValue)
-  const street = document.querySelector("#street")
-  street.value=item.address.street
-  street.disabled = !item.isEnabled
-  street.addEventListener('submit',updateValue)
-  const phone = document.querySelector("#phone")
-  phone.value=item.phone
-  phone.disabled = !item.isEnabled
-  phone.addEventListener('submit',updateValue)
-  const bs = document.querySelector("#bs")
-  bs.value=item.company.bs
-  bs.disabled = !item.isEnabled
-  const website = document.querySelector("#website")
-  website.value=item.website
-  website.disabled = !item.isEnabled
-  const zipcode = document.querySelector("#zipcode")
-  zipcode.value=item.address.zipcode
-  zipcode.disabled = !item.isEnabled
-  const suite = document.querySelector("#suite")
-  suite.value=item.address.suite
-  suite.disabled = !item.isEnabled
-} 
+})
+ } 
